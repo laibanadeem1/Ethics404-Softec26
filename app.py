@@ -10,9 +10,11 @@ flask_app = Flask(__name__)
 def receive_emails():
     data = request.get_json()
     emails = data.get("emails", [])
+    emails = emails[:15]  # ADD THIS LINE - hard cap at 15
     with open("received_emails.json", "w") as f:
         json.dump(emails, f)
     return jsonify({"status": "ok", "count": len(emails)})
+
 
 def run_flask():
     flask_app.run(port=5050, debug=False, use_reloader=False)
