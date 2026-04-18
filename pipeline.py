@@ -4,18 +4,46 @@ from utils import split_emails
 
 def process_all_emails(raw_text: str, student_profile: dict = None) -> list[dict]:
     emails = split_emails(raw_text)
-    emails=emails[:15]
-    results = []
+    emails = emails[:15]
+
+    # Deduplicate — remove emails with same first 100 chars
+    seen = set()
+    unique_emails = []
+    duplicates = []
 
     for i, email in enumerate(emails):
-        print(f"Processing email {i+1}/{len(emails)}...")
+        fingerprint = email.strip()[:100].lower()
+        if fingerprint in seen:
+            duplicates.append(i + 1)
+            print(f"Email {i+1} is a duplicate — skipping")
+        else:
+            seen.add(fingerprint)
+            unique_emails.append(email)
+
+    results = []
+
+    for i, email in enumerate(unique_emails):
+        print(f"Processing email {i+1}/{len(unique_emails)}...")
         result = extract_and_classify(email, student_profile)
         result["email_index"] = i + 1
         results.append(result)
-        
-        # Wait 4 seconds between calls to avoid 429
-        # 15 emails × 4s = 60s total, safe under 6000 TPM limit
-        if i < len(emails) - 1:  # no need to wait after last email
+
+        if i < len(unique_emails) - 1:
             time.sleep(4)
+
+    # Add duplicates as ignored spam entries
+    for dup_index in duplicates:
+        results.append({
+            "is_opportunity": False,
+            "email_index": dup_index,
+            "confidence": "high",
+            "reason": "Duplicate email — already seen in this batch.",
+            "legitimacy": "suspicious",
+            "legitimacy_reason": "Repetitive emails are a spam indicator.",
+            "red_flags": ["Duplicate email detected"]
+        })
+
+    # Sort by email_index so display order is clean
+    results.sort(key=lambda x: x.get("email_index", 0))
 
     return results

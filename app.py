@@ -117,10 +117,17 @@ if st.session_state.results:
     results = st.session_state.results
     opportunities = [r for r in results if r.get("is_opportunity")]
     non_opps      = [r for r in results if not r.get("is_opportunity")]
+    suspicious = [r for r in opportunities if r.get("legitimacy") == "suspicious"]
+    legitimate = [r for r in opportunities if r.get("legitimacy") == "legitimate"]
+
 
     st.markdown("---")
-    st.subheader(f"✅ {len(opportunities)} Opportunities Found | 🗑️ {len(non_opps)} Ignored")
-
+    st.subheader(
+    f"✅ {len(opportunities)} Opportunities Found | "
+    f"🟢 {len(legitimate)} Legitimate | "
+    f"🔴 {len(suspicious)} Suspicious | "
+    f"🗑️ {len(non_opps)} Ignored"
+)
     if not opportunities:
         st.info("No real opportunities detected in these emails.")
 
@@ -134,6 +141,20 @@ if st.session_state.results:
                 conf = opp.get("confidence", "low")
                 color = {"high": "🟢", "medium": "🟡", "low": "🔴"}.get(conf, "⚪")
                 st.markdown(f"**Confidence:** {color} {conf.title()}")
+            legitimacy = opp.get("legitimacy", "unknown")
+            leg_color = {"legitimate": "🟢", "suspicious": "🔴", "unknown": "🟡"}.get(legitimacy, "🟡")
+            st.markdown(f"**Legitimacy:** {leg_color} {legitimacy.title()}")
+            
+            if opp.get("legitimacy_reason"):
+                st.caption(f"🔍 {opp['legitimacy_reason']}")
+            
+            if opp.get("red_flags"):
+                with st.expander("⚠️ Red Flags Detected"):
+                    for flag in opp["red_flags"]:
+                        st.markdown(f"- 🚩 {flag}")
+
+            if opp.get("sender_domain"):
+                st.caption(f"📨 Sender domain: `{opp['sender_domain']}`")
 
             c1, c2, c3 = st.columns(3)
             with c1:

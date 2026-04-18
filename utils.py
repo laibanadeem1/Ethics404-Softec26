@@ -2,26 +2,21 @@ import re
 
 def split_emails(raw_text: str) -> list[str]:
     """
-    Auto-detect email boundaries using common email header patterns.
-    Splits when a new email header pattern appears after some content.
-    Falls back to --- splitting, then treats as single email.
+    Split emails by --- separator first.
+    If no --- found, split only on 'From:' at the start of a line.
     """
 
-    # These patterns signal the start of a new email
-    boundary_pattern = re.compile(
-        r'(?=\n[ \t]*(?:From|Subject|Date|Dear|To)\s*[:\,])',
-        re.IGNORECASE
-    )
+    # Primary: split by --- separator
+    if "---" in raw_text:
+        parts = [p.strip() for p in raw_text.split("---") if p.strip()]
+        return parts
 
-    parts = boundary_pattern.split(raw_text)
+    # Fallback: split only when 'From:' appears at start of a new line
+    # This won't split on Subject/Dear/Date inside an email
+    parts = re.split(r'\n(?=From\s*:)', raw_text, flags=re.IGNORECASE)
     parts = [p.strip() for p in parts if p.strip()]
 
-    # fallback 1: try --- splitting
-    if len(parts) <= 1:
-        parts = [p.strip() for p in raw_text.split("---") if p.strip()]
-
-    # fallback 2: treat whole thing as one email
     if not parts:
-        parts = [raw_text.strip()]
+        return [raw_text.strip()]
 
     return parts
