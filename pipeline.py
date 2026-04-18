@@ -1,8 +1,10 @@
 import time
 from extractor import extract_and_classify
-from utils import split_emails
+from utils import split_emails,clean_email
 
 def process_all_emails(raw_text: str, student_profile: dict = None) -> list[dict]:
+    if student_profile and student_profile.get('cv_text'):
+        student_profile['cv_text'] = clean_email(student_profile['cv_text'])
     emails = split_emails(raw_text)
     emails = emails[:15]
 
