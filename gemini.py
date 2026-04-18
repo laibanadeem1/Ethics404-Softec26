@@ -12,6 +12,11 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 model = genai.GenerativeModel("models/gemini-2.0-flash-lite")
 
+#models = genai.list_models()
+
+#for m in models:
+    #print(m.name, m.supported_generation_methods)
+
 def safe_generate(prompt: str, retries: int = 3) -> str:
     for attempt in range(retries):
         try:

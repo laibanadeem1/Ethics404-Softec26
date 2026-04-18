@@ -1,7 +1,7 @@
 # Ethics404-Softec26
 
 ## Overview
-Ethics404-Softec26 is an AI-powered Streamlit web application designed to analyze emails, extract relevant information, and manage student profiles. The system uses a modular pipeline architecture, integrating classification and extraction tasks, powered by the Gemini API.
+Ethics404-Softec26 is an AI-powered Streamlit web application designed to analyze emails, extract relevant information, and manage student profiles. The system uses a modular pipeline architecture, integrating classification and extraction tasks, powered by both the Gemini and Groq APIs.
 
 ## Features
 - **Interactive Interface:** Built with Streamlit for a seamless user experience.
@@ -20,6 +20,7 @@ Ethics404-Softec26/
 ├── extractor.py    # Extracts key entities and data points from email content
 ├── utils.py        # Shared utility functions
 ├── gemini.py       # Integration with Gemini AI models
+├── groq_client.py  # Integration with Groq AI models
 └── .env            # Environment configuration for API keys and settings
 ```
 
@@ -55,16 +56,17 @@ The main application follows a structured execution flow:
    ```
 
 3. **Install Dependencies:**
-   Ensure you have the required packages installed (e.g., Streamlit, python-dotenv, and Gemini SDKs).
+   Ensure you have the required packages installed (e.g., Streamlit, python-dotenv, Groq, and Gemini SDKs).
    ```bash
    pip install -r requirements.txt
    ```
-   *(Note: If a `requirements.txt` file is not present, you may need to install packages manually: `pip install streamlit python-dotenv google-generativeai`)*
+   *(Note: If a `requirements.txt` file is not present, you may need to install packages manually: `pip install streamlit python-dotenv google-generativeai groq`)*
 
 4. **Environment Variables:**
    Create a `.env` file in the root directory and add your API credentials:
    ```env
-   GEMINI_API_KEY=your_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
+   GROQ_API_KEY=your_groq_api_key_here
    ```
 
 ## Usage
