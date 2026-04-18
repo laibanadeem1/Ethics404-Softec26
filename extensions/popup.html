@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 260px;
+      padding: 16px;
+      font-family: sans-serif;
+      background: #0B140D;
+      color: #EAF6E5;
+    }
+    h3 { margin: 0 0 12px; font-size: 15px; }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #5B7E3C;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    button:hover { background: #4a6830; }
+    #status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #A2CB8B;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h3>📬 Opportunity Copilot</h3>
+  <button id="sendBtn">Send Emails to Copilot</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

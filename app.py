@@ -1,6 +1,23 @@
+import threading
 import json
 import streamlit as st
+from flask import Flask, request, jsonify
 from pipeline import process_all_emails
+
+flask_app = Flask(__name__)
+
+@flask_app.route("/receive", methods=["POST"])
+def receive_emails():
+    data = request.get_json()
+    emails = data.get("emails", [])
+    with open("received_emails.json", "w") as f:
+        json.dump(emails, f)
+    return jsonify({"status": "ok", "count": len(emails)})
+
+def run_flask():
+    flask_app.run(port=5050, debug=False, use_reloader=False)
+
+threading.Thread(target=run_flask, daemon=True).start()
 
 st.set_page_config(
     page_title="Opportunity Inbox Copilot",
@@ -30,35 +47,68 @@ if cv_file is not None:
         st.success("✅ CV uploaded successfully")
 
 # ── Email Input ────────────────────────────────────────────
-st.markdown("### 📧 Step 2: Paste Your Emails")
-email_input = st.text_area(
-    "Paste emails here (separate each with ---)",
-    height=250,
-    placeholder="""Dear Student, we are pleased to offer...
+st.markdown("### 📧 Step 2: Load Emails")
+manual_input = ""
+tab1, tab2 = st.tabs(["🔌 From Gmail Extension", "✍️ Paste Manually"])
 
----
+with tab1:
+    st.info("Install the Chrome extension, open Gmail, and click **Send to Copilot** in the extension popup.")
+    
+    if st.button("🔄 Check for emails from extension", use_container_width=True):
+        try:
+            with open("received_emails.json", "r") as f:
+                loaded = json.load(f)
+            st.session_state.email_boxes = loaded
+            st.success(f"✅ {len(loaded)} email(s) loaded from Gmail!")
+        except FileNotFoundError:
+            st.warning("No emails received yet. Make sure the extension sent them.")
 
-Hello, you have been selected for...
+with tab2:
+    st.caption("Paste emails below — the system detects boundaries automatically.")
+    manual_input = st.text_area(
+        "Paste emails here",
+        height=250,
+        placeholder="""From: scholarships@hec.gov.pk
+Subject: HEC Scholarship 2026
 
----
+Dear Student...
 
-This is a newsletter about upcoming events..."""
-)
+From: hr@techcorp.com
+Subject: Internship 2026
 
-analyze_btn = st.button("🔍 Analyze Emails", type="primary", use_container_width=True)
+Dear Applicant..."""
+    )
+    if manual_input.strip():
+        from utils import split_emails
+        detected = split_emails(manual_input)
+        st.caption(f"🔍 Detected **{len(detected)}** email(s)")
 
 if "results" not in st.session_state:
     st.session_state.results = []
 
+if "email_boxes" not in st.session_state:
+    st.session_state.email_boxes = []
+
+analyze_btn = st.button("🔍 Analyze Emails", type="primary", use_container_width=True)
+
 if analyze_btn:
-    if not email_input.strip():
-        st.warning("Please paste at least one email.")
-    elif not cv_text:
-        st.warning("Please upload your CV first so we can personalize the results.")
+    # figure out which source to use
+    if st.session_state.get("email_boxes"):
+        emails_to_process = st.session_state.email_boxes
+        raw_text = "\n---\n".join(emails_to_process)
+    elif manual_input.strip():
+        raw_text = manual_input
     else:
-        student_profile = {"cv_text": cv_text}
-        with st.spinner("Analyzing emails... ⏳"):
-            st.session_state.results = process_all_emails(email_input, student_profile)
+        st.warning("Please load or paste at least one email.")
+        st.stop()
+
+    if not cv_text:
+        st.warning("Please upload your CV first.")
+        st.stop()
+
+    student_profile = {"cv_text": cv_text}
+    with st.spinner("Analyzing emails... ⏳"):
+        st.session_state.results = process_all_emails(raw_text, student_profile)
 
 # ── Results ────────────────────────────────────────────────
 if st.session_state.results:

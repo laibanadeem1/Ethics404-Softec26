@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Opportunity Inbox Copilot",
+  "version": "1.0",
+  "description": "Send Gmail opportunities to your Copilot app",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "http://localhost:5050/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
