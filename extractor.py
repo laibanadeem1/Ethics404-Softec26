@@ -1,5 +1,5 @@
 import json
-from gemini import safe_generate
+from groq_client import safe_generate
 
 def extract_and_classify(email_text: str) -> dict:
     prompt = f"""

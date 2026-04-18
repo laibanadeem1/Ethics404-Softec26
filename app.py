@@ -123,7 +123,7 @@ if st.session_state.results:
             # Key fields in columns
             c1, c2, c3 = st.columns(3)
             with c1:
-                st.markdown(f"**Type:** {opp.get('type', 'N/A').title()}")
+                st.markdown(f"**Type:** {(opp.get('type') or 'N/A').title()}")
                 st.markdown(f"**Deadline:** {opp.get('deadline') or opp.get('deadline_raw') or 'Not mentioned'}")
             with c2:
                 st.markdown(f"**Location:** {opp.get('location') or 'Not mentioned'}")
