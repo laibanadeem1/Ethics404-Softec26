@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Opportunity Inbox Copilot",
+  "name": "ScanAhead",
   "version": "1.0",
-  "description": "Send Gmail opportunities to your Copilot app",
+  "description": "Send Gmail",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": [
     "https://mail.google.com/*",

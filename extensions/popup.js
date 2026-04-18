@@ -23,9 +23,9 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
       });
 
       const data = await res.json();
-      status.textContent = `✅ ${data.count} emails sent to Copilot!`;
+      status.textContent = `✅ ${data.count} emails sent to ScanAhead!`;
     } catch (err) {
-      status.textContent = "❌ Could not reach Copilot app. Is it running?";
+      status.textContent = "❌ Could not reach ScanAhead app. Is it running?";
     }
   });
 });

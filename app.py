@@ -10,11 +10,10 @@ flask_app = Flask(__name__)
 def receive_emails():
     data = request.get_json()
     emails = data.get("emails", [])
-    emails = emails[:15]  # ADD THIS LINE - hard cap at 15
+    emails = emails[:15]
     with open("received_emails.json", "w") as f:
         json.dump(emails, f)
     return jsonify({"status": "ok", "count": len(emails)})
-
 
 def run_flask():
     flask_app.run(port=5050, debug=False, use_reloader=False)
@@ -22,15 +21,14 @@ def run_flask():
 threading.Thread(target=run_flask, daemon=True).start()
 
 st.set_page_config(
-    page_title="Opportunity Inbox Copilot",
-    page_icon="📬",
+    page_title="ScanAhead",
+    page_icon="",
     layout="wide"
 )
 
-st.title("📬 Opportunity Inbox Copilot")
+st.title("ScanAhead: Your Personal Opportunity Scanner")
 st.caption("Upload your resume and paste your emails to get personalized opportunity rankings.")
 
-# ── Resume Upload ──────────────────────────────────────────
 st.markdown("### 📄 Step 1: Upload Your Resume / CV")
 cv_file = st.file_uploader("Upload your CV (PDF or TXT)", type=["pdf", "txt"])
 
@@ -48,14 +46,12 @@ if cv_file is not None:
         cv_text = cv_file.read().decode("utf-8")
         st.success("✅ CV uploaded successfully")
 
-# ── Email Input ────────────────────────────────────────────
 st.markdown("### 📧 Step 2: Load Emails")
 manual_input = ""
-tab1, tab2 = st.tabs(["🔌 From Gmail Extension", "✍️ Paste Manually"])
+tab1, tab2 = st.tabs([" Gmail Extension", "Paste Manually"])
 
 with tab1:
     st.info("Install the Chrome extension, open Gmail, and click **Send to Copilot** in the extension popup.")
-    
     if st.button("🔄 Check for emails from extension", use_container_width=True):
         try:
             with open("received_emails.json", "r") as f:
@@ -94,10 +90,8 @@ if "email_boxes" not in st.session_state:
 analyze_btn = st.button("🔍 Analyze Emails", type="primary", use_container_width=True)
 
 if analyze_btn:
-    # figure out which source to use
     if st.session_state.get("email_boxes"):
-        emails_to_process = st.session_state.email_boxes
-        raw_text = "\n---\n".join(emails_to_process)
+        raw_text = "\n---\n".join(st.session_state.email_boxes)
     elif manual_input.strip():
         raw_text = manual_input
     else:
@@ -112,22 +106,21 @@ if analyze_btn:
     with st.spinner("Analyzing emails... ⏳"):
         st.session_state.results = process_all_emails(raw_text, student_profile)
 
-# ── Results ────────────────────────────────────────────────
 if st.session_state.results:
     results = st.session_state.results
     opportunities = [r for r in results if r.get("is_opportunity")]
     non_opps      = [r for r in results if not r.get("is_opportunity")]
-    suspicious = [r for r in opportunities if r.get("legitimacy") == "suspicious"]
-    legitimate = [r for r in opportunities if r.get("legitimacy") == "legitimate"]
-
+    suspicious    = [r for r in opportunities if r.get("legitimacy") == "suspicious"]
+    legitimate    = [r for r in opportunities if r.get("legitimacy") == "legitimate"]
 
     st.markdown("---")
     st.subheader(
-    f"✅ {len(opportunities)} Opportunities Found | "
-    f"🟢 {len(legitimate)} Legitimate | "
-    f"🔴 {len(suspicious)} Suspicious | "
-    f"🗑️ {len(non_opps)} Ignored"
-)
+        f"✅ {len(opportunities)} Opportunities Found | "
+        f"🟢 {len(legitimate)} Legitimate | "
+        f"🔴 {len(suspicious)} Suspicious | "
+        f"🗑️ {len(non_opps)} Ignored"
+    )
+
     if not opportunities:
         st.info("No real opportunities detected in these emails.")
 
@@ -141,13 +134,14 @@ if st.session_state.results:
                 conf = opp.get("confidence", "low")
                 color = {"high": "🟢", "medium": "🟡", "low": "🔴"}.get(conf, "⚪")
                 st.markdown(f"**Confidence:** {color} {conf.title()}")
+
             legitimacy = opp.get("legitimacy", "unknown")
             leg_color = {"legitimate": "🟢", "suspicious": "🔴", "unknown": "🟡"}.get(legitimacy, "🟡")
             st.markdown(f"**Legitimacy:** {leg_color} {legitimacy.title()}")
-            
+
             if opp.get("legitimacy_reason"):
                 st.caption(f"🔍 {opp['legitimacy_reason']}")
-            
+
             if opp.get("red_flags"):
                 with st.expander("⚠️ Red Flags Detected"):
                     for flag in opp["red_flags"]:
@@ -169,18 +163,12 @@ if st.session_state.results:
 
             if opp.get("eligibility"):
                 st.markdown(f"**Eligibility:** {opp['eligibility']}")
-
             if opp.get("documents"):
-                docs = ", ".join(opp["documents"])
-                st.markdown(f"**Documents needed:** `{docs}`")
-
+                st.markdown(f"**Documents needed:** `{', '.join(opp['documents'])}`")
             if opp.get("skills_required"):
-                skills = ", ".join(opp["skills_required"])
-                st.markdown(f"**Skills required:** `{skills}`")
-
+                st.markdown(f"**Skills required:** `{', '.join(opp['skills_required'])}`")
             if opp.get("next_steps"):
                 st.info(f"**Next step:** {opp['next_steps']}")
-
             if opp.get("link"):
                 st.markdown(f"[🔗 Apply Here]({opp['link']})")
 
@@ -190,6 +178,6 @@ if st.session_state.results:
             st.markdown("---")
 
     if non_opps:
-        with st.expander(f"🗑️ {len(non_opps)} ignored emails"):
+        with st.expander(f"{len(non_opps)} ignored emails"):
             for n in non_opps:
                 st.markdown(f"- **Email #{n.get('email_index')}:** {n.get('reason')}")
