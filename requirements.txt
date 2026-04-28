@@ -3,3 +3,5 @@ groq
 python-dotenv
 streamlit
 pdfplumber
+flask
+dnspython
