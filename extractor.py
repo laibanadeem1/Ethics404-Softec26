@@ -13,19 +13,9 @@ Student Resume (use this to assess fit):
     prompt = f"""You are an AI assistant for university students in Pakistan.
 {profile_section}
 
-Analyze the email below. Do TWO things:
+Analyze the email below and extract the opportunity details.
 
-## TASK 1 — LEGITIMACY CHECK
-Check if this email is from a legitimate sender:
-- Educational orgs should have .edu, .edu.pk, .ac.pk, .org domains
-- Government orgs should have .gov, .gov.pk domains  
-- Legitimate companies have professional domains (not gmail.com, yahoo.com, hotmail.com for official announcements)
-- Check if the email content is consistent with the sender domain
-- Check for red flags: vague eligibility, no official website, asks for money upfront, poor grammar, too-good-to-be-true offers
-- A legitimate scholarship/internship will NEVER ask for payment upfront
-- Personal gmail/yahoo addresses sending "official" opportunities = suspicious
-
-## TASK 2 — OPPORTUNITY DETECTION & EXTRACTION
+## TASK — OPPORTUNITY DETECTION & EXTRACTION
 Decide if this email contains a real opportunity:
 - Real: internship, scholarship, fellowship, competition, hackathon, admission, research, exchange program
 - NOT real: newsletters, marketing, spam, shipment, OTP, promotions, general announcements
@@ -35,10 +25,7 @@ Reply with ONLY a valid JSON object, no markdown, no explanation:
   "is_opportunity": true or false,
   "confidence": "high" or "medium" or "low",
   "reason": "one sentence explaining decision",
-  "legitimacy": "legitimate" or "suspicious" or "unknown",
-  "legitimacy_reason": "one sentence explaining legitimacy verdict",
-  "red_flags": ["list any red flags found"] or [],
-  "sender_domain": "extracted domain from sender email or null",
+  "red_flags": ["list any red flags found in the text"] or [],
   "title": "opportunity name or null",
   "organization": "who is offering it or null",
   "type": "internship or scholarship or fellowship or competition or admission or research or other or null",
@@ -85,5 +72,5 @@ EMAIL TO ANALYZE:
         return {
             "is_opportunity": False,
             "confidence": "low",
-            "reason": "Failed to parse response.",
+            "reason": "Failed to parse response."
         }

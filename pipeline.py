@@ -1,5 +1,6 @@
 import time
 from extractor import extract_and_classify
+from authenticator import evaluate_authenticity, extract_domain
 from utils import split_emails
 
 def process_all_emails(raw_text: str, student_profile: dict = None) -> list[dict]:
@@ -24,8 +25,20 @@ def process_all_emails(raw_text: str, student_profile: dict = None) -> list[dict
 
     for i, email in enumerate(unique_emails):
         print(f"Processing email {i+1}/{len(unique_emails)}...")
+        
+        # 1. Run strict Python-based Authenticity Check
+        auth_result = evaluate_authenticity(email)
+        domain = extract_domain(email)
+        
+        # 2. Run LLM Extraction for the opportunity details
         result = extract_and_classify(email, student_profile)
+        
+        # 3. Merge the authentications results into the LLM output dict
         result["email_index"] = i + 1
+        result["legitimacy"] = auth_result["status"]
+        result["legitimacy_reason"] = auth_result["reason"]
+        result["sender_domain"] = domain
+        
         results.append(result)
 
         if i < len(unique_emails) - 1:
@@ -40,7 +53,8 @@ def process_all_emails(raw_text: str, student_profile: dict = None) -> list[dict
             "reason": "Duplicate email — already seen in this batch.",
             "legitimacy": "suspicious",
             "legitimacy_reason": "Repetitive emails are a spam indicator.",
-            "red_flags": ["Duplicate email detected"]
+            "red_flags": ["Duplicate email detected"],
+            "sender_domain": None
         })
 
     # Sort by email_index so display order is clean
