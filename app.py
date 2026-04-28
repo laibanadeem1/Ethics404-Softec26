@@ -29,7 +29,7 @@ st.set_page_config(
 st.title("ScanAhead: Your Personal Opportunity Scanner")
 st.caption("Upload your resume and paste your emails to get personalized opportunity rankings.")
 
-st.markdown("### 📄 Step 1: Upload Your Resume / CV")
+st.markdown("### Upload Your Resume / CV")
 cv_file = st.file_uploader("Upload your CV (PDF or TXT)", type=["pdf", "txt"])
 
 cv_text = ""
@@ -46,7 +46,7 @@ if cv_file is not None:
         cv_text = cv_file.read().decode("utf-8")
         st.success("✅ CV uploaded successfully")
 
-st.markdown("### 📧 Step 2: Load Emails")
+st.markdown("### Load Emails")
 manual_input = ""
 tab1, tab2 = st.tabs([" Gmail Extension", "Paste Manually"])
 
